@@ -31,6 +31,13 @@ def launch_web_ui() -> None:
     except ImportError as e:
         raise RuntimeError("Streamlit not installed. Install with: uv sync") from e
 
+    # Set environment variables to disable telemetry
+    import os
+
+    env = os.environ.copy()
+    env["STREAMLIT_BROWSER_GATHER_USAGE_STATS"] = "false"
+    env["STREAMLIT_SERVER_HEADLESS"] = "false"  # Allow browser to open
+
     # Launch Streamlit server (browser opens automatically)
     subprocess.run(
         [
@@ -39,7 +46,7 @@ def launch_web_ui() -> None:
             "streamlit",
             "run",
             str(app_file),
-            "--browser.gatherUsageStats=false",  # Disable telemetry prompt
         ],
         check=False,  # Don't raise on Ctrl+C
+        env=env,
     )

@@ -1,0 +1,24 @@
+{
+  "stage": "enhancing",
+  "current_video": "5uSboan45Zg",
+  "total_videos": 0,
+  "processed_videos": [
+    {
+      "video_id": "5uSboan45Zg",
+      "source": "https://www.youtube.com/watch?v=5uSboan45Zg",
+      "status": "success",
+      "output_dir": "/Users/robotdad/transcripts/5uSboan45Zg",
+      "error": null,
+      "duration_seconds": 256.0,
+      "cost_estimate": 0.0256,
+      "processed_at": "2025-10-22T22:55:16.598193"
+    }
+  ],
+  "failed_videos": [],
+  "total_duration_seconds": 256.0,
+  "total_cost_estimate": 0.0256,
+  "sources": [],
+  "output_dir": null,
+  "created_at": "2025-10-22T22:54:42.158226",
+  "updated_at": "2025-10-22T22:55:16.598201"
+}
