@@ -85,12 +85,15 @@ uvx --from git+https://github.com/robotdad/amplifier-app-transcribe transcribe -
 ```
 
 Then:
-1. Paste a YouTube URL or file path
-2. Click "Transcribe"
-3. Watch progress with elapsed time
-4. View results in tabbed interface (Insights | Transcript)
+1. Configure API keys in settings (if not already set via .env)
+2. Paste a YouTube URL or file path
+3. Click "Transcribe"
+4. Watch progress with elapsed time
+5. View results in tabbed interface (Insights | Transcript)
 
-Perfect for quick one-off transcriptions without remembering command-line flags.
+Perfect for quick one-off transcriptions without remembering command-line flags or setting up .env files.
+
+**Settings**: Click "⚙️ Settings & Configuration" to expand. If API keys aren't already configured via .env or environment variables, you can provide them directly in the web UI. Keys are session-only and not saved to disk.
 
 ### CLI: Single YouTube Video
 
@@ -147,15 +150,21 @@ uvx --from git+https://github.com/robotdad/amplifier-app-transcribe transcribe "
 
 ### API Keys Required
 
-Set environment variables OR create a `.env` file:
+Three ways to provide API keys:
 
-**Option 1: Environment Variables**
+**Option 1: Web UI Settings** (Easiest for first-time users)
+- Launch with `transcribe --web`
+- Click "⚙️ Settings & Configuration" to expand
+- Enter keys (displayed as password fields)
+- Keys are session-only (not saved to disk)
+
+**Option 2: Environment Variables**
 ```bash
 export OPENAI_API_KEY=sk-...      # For transcription (Whisper)
 export ANTHROPIC_API_KEY=sk-ant-... # For insights (optional)
 ```
 
-**Option 2: .env File**
+**Option 3: .env File**
 
 Create `.env` in your working directory:
 ```bash
