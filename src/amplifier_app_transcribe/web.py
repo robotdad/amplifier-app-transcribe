@@ -31,7 +31,7 @@ def launch_web_ui() -> None:
     except ImportError as e:
         raise RuntimeError("Streamlit not installed. Install with: uv sync") from e
 
-    # Launch Streamlit server
+    # Launch Streamlit server (browser opens automatically)
     subprocess.run(
         [
             sys.executable,
@@ -39,7 +39,6 @@ def launch_web_ui() -> None:
             "streamlit",
             "run",
             str(app_file),
-            "--server.headless=true",
         ],
         check=False,  # Don't raise on Ctrl+C
     )
