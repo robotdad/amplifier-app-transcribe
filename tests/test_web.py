@@ -2,7 +2,7 @@
 
 from unittest.mock import Mock
 
-import pytest
+import pytest  # type: ignore
 
 from amplifier_app_transcribe.web import launch_web_ui
 
