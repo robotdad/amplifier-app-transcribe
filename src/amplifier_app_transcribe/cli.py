@@ -30,30 +30,26 @@ def setup_logging(verbose: bool = False):
     )
 
 
-@click.group()
-def cli():
-    """Transcribe videos and audio files with AI-powered insights."""
-    pass
-
-
-@cli.command()
-@click.argument("sources", nargs=-1, required=True)
+@click.command()
+@click.argument("sources", nargs=-1, required=False)
 @click.option("--resume", is_flag=True, help="Resume from last saved state")
 @click.option("--session-dir", type=click.Path(path_type=Path), help="Session directory for state")
 @click.option("--output-dir", type=click.Path(path_type=Path), help="Output directory for transcripts")
 @click.option("--no-enhance", is_flag=True, help="Skip AI enhancements (summaries/quotes)")
 @click.option("--force-download", is_flag=True, help="Skip cache and re-download audio")
+@click.option("--index-only", is_flag=True, help="Generate index.md only (no transcription)")
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose logging")
-def transcribe(
-    sources: tuple[str],
+def cli(
+    sources: tuple[str] | None,
     resume: bool,
     session_dir: Path | None,
     output_dir: Path | None,
     no_enhance: bool,
     force_download: bool,
+    index_only: bool,
     verbose: bool,
 ):
-    """Transcribe videos or audio files.
+    """Transcribe videos and audio files with AI-powered insights.
 
     SOURCES can be YouTube URLs or local file paths.
 
@@ -64,12 +60,25 @@ def transcribe(
         transcribe video.mp4 audio.mp3
 
         transcribe *.mp4 --resume
+
+        transcribe --index-only  # Generate index only
     """
     # Load environment variables from .env
     load_dotenv()
 
     # Setup logging
     setup_logging(verbose)
+
+    # Handle index-only mode
+    if index_only:
+        return _generate_index(output_dir)
+
+    # Require sources for transcription
+    if not sources:
+        console.print("[red]Error: Provide at least one video URL or audio file[/red]")
+        console.print("\nUsage: transcribe URL [URL...] [OPTIONS]")
+        console.print("Or: transcribe --index-only")
+        sys.exit(1)
 
     try:
         # Tools are initialized internally by pipeline from git dependencies
@@ -160,10 +169,8 @@ def transcribe(
         sys.exit(1)
 
 
-@cli.command()
-@click.option("--output-dir", type=click.Path(path_type=Path), help="Transcripts directory")
-def index(output_dir: Path | None):
-    """Generate index.md for all transcripts."""
+def _generate_index(output_dir: Path | None = None) -> int:
+    """Generate index.md for all transcripts (internal helper)."""
     from .storage import TranscriptStorage
 
     storage = TranscriptStorage(output_dir)
@@ -188,6 +195,7 @@ def index(output_dir: Path | None):
     console.print("  • transcript.md - Formatted transcript")
     console.print("  • insights.md - AI summary and quotes")
     console.print("  • transcript.json - Full data")
+    return 0
 
 
 def _show_results(state, console: Console):
