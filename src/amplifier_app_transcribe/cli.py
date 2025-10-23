@@ -32,6 +32,7 @@ def setup_logging(verbose: bool = False):
 
 @click.command()
 @click.argument("sources", nargs=-1, required=False)
+@click.option("--web", is_flag=True, help="Launch web interface in browser")
 @click.option("--resume", is_flag=True, help="Resume from last saved state")
 @click.option("--session-dir", type=click.Path(path_type=Path), help="Session directory for state")
 @click.option("--output-dir", type=click.Path(path_type=Path), help="Output directory for transcripts")
@@ -41,6 +42,7 @@ def setup_logging(verbose: bool = False):
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose logging")
 def cli(
     sources: tuple[str] | None,
+    web: bool,
     resume: bool,
     session_dir: Path | None,
     output_dir: Path | None,
@@ -55,6 +57,8 @@ def cli(
 
     Examples:
 
+        transcribe --web  # Launch browser UI
+
         transcribe https://youtube.com/watch?v=...
 
         transcribe video.mp4 audio.mp3
@@ -68,6 +72,13 @@ def cli(
 
     # Setup logging
     setup_logging(verbose)
+
+    # Handle web mode
+    if web:
+        from .web import launch_web_ui
+
+        launch_web_ui()
+        return  # launch_web_ui blocks until killed
 
     # Handle index-only mode
     if index_only:
