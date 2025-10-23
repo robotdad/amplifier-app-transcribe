@@ -24,6 +24,26 @@ Transcribe is a complete transcription pipeline that:
 
 **The result**: Searchable, readable transcripts you can reference forever.
 
+## Two Ways to Use
+
+Transcribe offers two interfaces for the same powerful transcription engine:
+
+### Command Line (CLI)
+Fast, scriptable, ideal for batch processing and automation.
+
+```bash
+transcribe "URL" [OPTIONS]
+```
+
+### Web Interface
+Visual, browser-based, perfect for quick one-off transcriptions.
+
+```bash
+transcribe --web
+```
+
+Opens in your browser with a simple paste-and-click interface. Both interfaces share the same underlying pipeline and produce identical results.
+
 ## Features
 
 ### Multi-Source Support
@@ -56,7 +76,23 @@ Transcribe is a complete transcription pipeline that:
 
 ## Usage Examples
 
-### Single YouTube Video
+### Web Interface (Easiest)
+
+Launch the web UI in your browser:
+
+```bash
+uvx --from git+https://github.com/robotdad/amplifier-app-transcribe transcribe --web
+```
+
+Then:
+1. Paste a YouTube URL or file path
+2. Click "Transcribe"
+3. Watch progress with elapsed time
+4. View results in tabbed interface (Insights | Transcript)
+
+Perfect for quick one-off transcriptions without remembering command-line flags.
+
+### CLI: Single YouTube Video
 
 ```bash
 uvx --from git+https://github.com/robotdad/amplifier-app-transcribe transcribe "https://youtube.com/watch?v=dQw4w9WgXcQ"
@@ -224,18 +260,23 @@ export ANTHROPIC_API_KEY=sk-ant-...  # Optional, for insights
 ## Command Reference
 
 ```
-usage: uvx --from git+https://github.com/robotdad/amplifier-app-transcribe transcribe [OPTIONS] SOURCES...
+usage: uvx --from git+https://github.com/robotdad/amplifier-app-transcribe transcribe [OPTIONS] [SOURCES...]
 
 arguments:
-  SOURCES              YouTube URLs or local file paths
+  SOURCES              YouTube URLs or local file paths (not needed with --web)
 
 options:
-  --resume            Resume from last checkpoint
+  --web               Launch web interface in browser
+  --resume            Resume from last checkpoint (CLI only)
   --output-dir DIR    Custom output location
   --no-enhance        Skip AI insights (faster, cheaper)
   --force-download    Re-download even if cached
-  --help             Show this help
+  --help              Show this help
 ```
+
+**Web Interface**: Use `--web` to launch browser-based UI. No sources needed - paste URL in the web form.
+
+**CLI Mode**: Provide sources as arguments for command-line processing.
 
 ## Advanced Usage
 
@@ -260,10 +301,11 @@ Useful for resuming specific sessions.
 Built on amplifier-dev tools:
 - **tool-whisper** - OpenAI Whisper integration
 - **tool-youtube-dl** - YouTube downloads
+- **Streamlit** - Web interface (optional)
 - **Rich** - Beautiful CLI output
 - **Click** - Command-line interface
 
-The app demonstrates composing amplifier tools into complete workflows.
+The app demonstrates composing amplifier tools into complete workflows with both CLI and web interfaces.
 
 ## Learn More
 

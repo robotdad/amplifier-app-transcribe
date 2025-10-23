@@ -265,6 +265,109 @@ This came from a conversation where:
 
 **The code is the artifact. The intent is the source.**
 
+## Adding the Web Interface: Intent-Driven Evolution
+
+After the CLI was working, we added an optional web interface. The conversation followed the same intent-driven pattern.
+
+### The Intent
+
+**User**: "I want to consider how we can add an optional web frontend to this. It should start via a new parameter, I do not want to change the current parameters. The existing cli should keep working as it is."
+
+**Key requirements expressed**:
+- Preserve CLI behavior completely (no breaking changes)
+- Optional via flag (user chooses interface)
+- Still uvx-runnable (no build step)
+- Simple progress display
+- Tabbed results view
+
+### The Architecture Decision
+
+**zen-architect's analysis** (via Task delegation):
+- Streamlit fits ruthless simplicity principle
+- Pure Python (~200 lines vs 500+ for alternatives)
+- No HTML/CSS/JS required
+- Built-in components match needs (tabs, markdown, progress)
+- Callback pattern bridges CLI and web without modifying core pipeline
+
+**Key architectural insight**: Add optional callback to pipeline. CLI ignores it (None), web uses it. Clean extension point, no log suppression hacks.
+
+### The Specification
+
+**Module boundaries defined**:
+1. **Pipeline extension** - Optional `on_progress` callback parameter
+2. **Web launcher** (web.py) - Spawn Streamlit subprocess
+3. **Streamlit UI** (_web_app.py) - Browser interface
+4. **CLI integration** - `--web` flag routing
+
+**Interfaces ("studs") specified**:
+- Pipeline callback: `(stage: str, data: dict) -> None`
+- Launch function: `launch_web_ui() -> NoReturn`
+- CLI flag: `--web` conditional import
+
+### The Conversation Pattern
+
+**User wanted**: "Just time elapsed to keep it simple show it hasn't died?"
+
+**Translation**: No complex stage breakdowns initially. Simple spinner + elapsed time counter. Can enhance later based on feedback.
+
+**User confirmed**: "This sounds good generally... Run this by @agent-zen-architect before we get going."
+
+**Delegation pattern**: Used specialized agent for architectural review. zen-architect validated design, refined callback pattern, confirmed philosophy alignment.
+
+### What This Demonstrates
+
+**Intent-driven evolution**:
+- Started with "how can we add web frontend"
+- Not "implement Streamlit with these classes"
+- Discussed options (Streamlit vs FastAPI vs Flask)
+- Chose based on simplicity principle
+- Specified clean interfaces before implementation
+
+**Architecture-first conversation**:
+- Callback pattern vs log capture
+- Single package vs separate web package
+- Progress simplification (time only vs full stages)
+- Delegation to specialized agent (zen-architect)
+
+**Preserved existing behavior**:
+- CLI works unchanged
+- `--web` is opt-in
+- Both use same pipeline core
+- uvx compatibility maintained
+
+### The DDD Process
+
+1. **Phase 1: Planning** - Created complete specification in ai_working/ddd/plan.md
+2. **Phase 2: Documentation** - Updated README, pyproject.toml as if web UI already exists
+3. **Phase 3: Code Planning** - Will specify implementation chunks
+4. **Phase 4: Implementation** - Will code to match specifications
+5. **Phase 5: Verification** - Test behavior matches documentation
+
+**Still in documentation phase**: Code implements what docs describe, not the other way around.
+
+### The Pattern Repeats
+
+Same intent-driven approach as original app creation:
+- Express what you want (web interface)
+- Discuss architecture (Streamlit? FastAPI?)
+- Define interfaces (callback pattern)
+- Document first (README with `--web` examples)
+- Implement later (code matches documentation)
+
+**The conversation stays at architecture level**. No discussion of:
+- Streamlit session_state implementation
+- Subprocess spawn mechanics
+- Callback invocation details
+- File path resolution code
+
+**The conversation focuses on**:
+- User experience (paste URL, click, view results)
+- Simplicity principle (Streamlit vs alternatives)
+- Interface design (callback signature)
+- Module boundaries (what goes where)
+
+**The code is the artifact. The intent is the source.**
+
 ## Try It Yourself
 
 When you want to create something:
