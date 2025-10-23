@@ -8,6 +8,7 @@ Uses WhisperTranscriber and VideoLoader from tool modules.
 # pyright: reportAttributeAccessIssue=false, reportMissingImports=false
 
 import logging
+from collections.abc import Callable
 
 from amplifier_module_tool_whisper import WhisperTranscriber  # type: ignore
 from amplifier_module_tool_youtube_dl import AudioExtractor, VideoLoader  # type: ignore
@@ -18,6 +19,9 @@ from .storage import TranscriptStorage
 
 logger = logging.getLogger(__name__)
 
+# Type alias for progress callback
+ProgressCallback = Callable[[str, dict], None]
+
 
 class TranscriptionPipeline:
     """Orchestrates the transcription pipeline using tool core classes."""
@@ -27,6 +31,7 @@ class TranscriptionPipeline:
         state_manager: StateManager | None = None,
         enhance: bool = True,
         force_download: bool = False,
+        on_progress: ProgressCallback | None = None,
     ):
         """Initialize pipeline.
 
@@ -34,6 +39,7 @@ class TranscriptionPipeline:
             state_manager: State manager for persistence (creates new if None)
             enhance: Whether to enable AI enhancements (summaries/quotes)
             force_download: If True, skip cache and re-download audio
+            on_progress: Optional callback for progress updates (stage, data) -> None
         """
         # Initialize tool core classes directly
         self.whisper = WhisperTranscriber()
@@ -42,6 +48,7 @@ class TranscriptionPipeline:
         self.state = state_manager or StateManager()
         self.enhance = enhance
         self.force_download = force_download
+        self.on_progress = on_progress
 
         # Initialize storage
         self.storage = TranscriptStorage()
@@ -58,6 +65,19 @@ class TranscriptionPipeline:
                 logger.warning(f"AI enhancement disabled: {e}")
                 self.enhance = False
 
+    def _report_progress(self, stage: str, data: dict | None = None) -> None:
+        """Report progress to callback if registered.
+
+        Args:
+            stage: Pipeline stage name
+            data: Optional metadata (cost, duration, video_id, etc.)
+        """
+        if self.on_progress:
+            try:
+                self.on_progress(stage, data or {})
+            except Exception as e:
+                logger.warning(f"Progress callback failed: {e}")
+
     def process_video(self, source: str) -> bool:
         """Process a single video/audio source.
 
@@ -70,6 +90,7 @@ class TranscriptionPipeline:
         try:
             # Stage 1: Load video info
             self.state.update_stage("loading", source)
+            self._report_progress("loading", {"source": source})
 
             # Determine if source is URL or local file
             is_url = source.startswith("http://") or source.startswith("https://")
@@ -119,6 +140,7 @@ class TranscriptionPipeline:
 
             # Stage 2: Download/extract audio
             self.state.update_stage("extracting", video_info.id)
+            self._report_progress("extracting", {"video_id": video_info.id, "title": video_info.title})
 
             if is_url:
                 # Download audio using youtube tool
@@ -136,16 +158,19 @@ class TranscriptionPipeline:
 
             # Stage 4: Transcribe
             self.state.update_stage("transcribing", video_info.id)
+            self._report_progress("transcribing", {"video_id": video_info.id, "duration": video_info.duration})
             transcript = self.whisper.transcribe(audio_path, prompt=f"Transcription of: {video_info.title}")
 
             # Stage 5: Save outputs
             self.state.update_stage("saving", video_info.id)
+            self._report_progress("saving", {"video_id": video_info.id})
             output_dir = self.storage.save(transcript, video_info, audio_path)
 
             # Stage 6: AI Enhancement (if enabled)
             if self.enhance and self.summary_generator and self.quote_extractor:
                 try:
                     self.state.update_stage("enhancing", video_info.id)
+                    self._report_progress("enhancing", {"video_id": video_info.id})
                     logger.info("Generating AI enhancements...")
 
                     # Generate summary
@@ -239,5 +264,6 @@ class TranscriptionPipeline:
 
         # Mark complete
         self.state.mark_complete()
+        self._report_progress("complete", {"total_processed": len(self.state.state.processed_videos)})
 
         return all_success
