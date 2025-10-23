@@ -4,9 +4,20 @@ Web UI Launcher
 Spawns Streamlit server for browser-based interface.
 """
 
+import os
 import subprocess
 import sys
 from pathlib import Path
+
+
+def _setup_streamlit_config() -> None:
+    """Create Streamlit credentials file to skip email prompt."""
+    credentials_path = Path.home() / ".streamlit" / "credentials.toml"
+    credentials_path.parent.mkdir(parents=True, exist_ok=True)
+
+    # Only create if doesn't exist
+    if not credentials_path.exists():
+        credentials_path.write_text('[general]\nemail = ""\n')
 
 
 def launch_web_ui() -> None:
@@ -31,12 +42,12 @@ def launch_web_ui() -> None:
     except ImportError as e:
         raise RuntimeError("Streamlit not installed. Install with: uv sync") from e
 
-    # Set environment variables to disable telemetry
-    import os
+    # Setup credentials to skip email prompt
+    _setup_streamlit_config()
 
+    # Set environment variables to disable telemetry
     env = os.environ.copy()
     env["STREAMLIT_BROWSER_GATHER_USAGE_STATS"] = "false"
-    env["STREAMLIT_SERVER_HEADLESS"] = "false"  # Allow browser to open
 
     # Launch Streamlit server (browser opens automatically)
     subprocess.run(
