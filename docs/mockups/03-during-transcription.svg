@@ -1,0 +1,44 @@
+<svg width="800" height="600" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="600" fill="#0e1117"/>
+
+  <!-- Header -->
+  <text x="40" y="60" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#ffffff">🎥 Transcribe</text>
+
+  <!-- Info box (condensed during processing) -->
+  <rect x="40" y="80" width="720" height="60" rx="8" fill="#1f2937" stroke="#3b82f6" stroke-width="2"/>
+  <text x="60" y="110" font-family="Arial, sans-serif" font-size="14" fill="#60a5fa" font-weight="bold">ℹ️ Transform YouTube videos and audio files into searchable transcripts</text>
+
+  <!-- Settings Expander (collapsed, disabled) -->
+  <rect x="40" y="160" width="720" height="40" rx="6" fill="#1f2937" stroke="#374151" stroke-width="1" opacity="0.5"/>
+  <text x="50" y="185" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">▶ ⚙️ Settings &amp; Configuration</text>
+
+  <!-- URL Input (disabled) -->
+  <text x="40" y="230" font-family="Arial, sans-serif" font-size="13" fill="#6b7280">YouTube URL or file path</text>
+  <rect x="40" y="240" width="640" height="45" rx="6" fill="#1f2937" stroke="#374151" stroke-width="1" opacity="0.5"/>
+  <text x="50" y="267" font-family="Arial, sans-serif" font-size="14" fill="#6b7280">https://youtube.com/watch?v=dQw4w9WgXcQ</text>
+
+  <!-- AI Insights checkbox (disabled) -->
+  <rect x="690" y="240" width="70" height="45" rx="6" fill="#1f2937" stroke="#374151" stroke-width="1" opacity="0.5"/>
+  <rect x="700" y="255" width="16" height="16" rx="3" fill="#3b82f6" stroke="#60a5fa" stroke-width="2"/>
+  <path d="M 704 261 L 708 265 L 714 257" stroke="#ffffff" stroke-width="2" fill="none"/>
+
+  <!-- Progress Panel -->
+  <rect x="40" y="310" width="720" height="200" rx="8" fill="#1f2937" stroke="#3b82f6" stroke-width="2"/>
+
+  <!-- Spinner animation -->
+  <circle cx="400" cy="370" r="30" fill="none" stroke="#3b82f6" stroke-width="4" stroke-dasharray="150" stroke-dashoffset="50" opacity="0.3"/>
+  <circle cx="400" cy="370" r="30" fill="none" stroke="#60a5fa" stroke-width="4" stroke-dasharray="50 100" stroke-dashoffset="0">
+    <animateTransform attributeName="transform" type="rotate" from="0 400 370" to="360 400 370" dur="1s" repeatCount="indefinite"/>
+  </circle>
+
+  <text x="400" y="430" font-family="Arial, sans-serif" font-size="16" fill="#ffffff" text-anchor="middle" font-weight="bold">Processing...</text>
+
+  <!-- Stage and elapsed time -->
+  <rect x="160" y="450" width="480" height="40" rx="6" fill="#111827"/>
+  <text x="400" y="475" font-family="Arial, sans-serif" font-size="14" fill="#9ca3af" text-anchor="middle">Stage: transcribing  •  ⏱️ 47.3s elapsed</text>
+
+  <!-- Transcribe Button (disabled) -->
+  <rect x="40" y="530" width="720" height="50" rx="8" fill="#374151" stroke="#4b5563" stroke-width="1"/>
+  <text x="400" y="561" font-family="Arial, sans-serif" font-size="16" fill="#6b7280" text-anchor="middle">Transcribe</text>
+</svg>

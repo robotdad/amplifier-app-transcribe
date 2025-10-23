@@ -1,0 +1,59 @@
+<svg width="800" height="900" xmlns="http://www.w3.org/2000/svg">
+  <!-- Background -->
+  <rect width="800" height="900" fill="#0e1117"/>
+
+  <!-- Header -->
+  <text x="40" y="60" font-family="Arial, sans-serif" font-size="32" font-weight="bold" fill="#ffffff">🎥 Transcribe</text>
+
+  <!-- Success message -->
+  <rect x="40" y="80" width="720" height="50" rx="8" fill="#065f46" stroke="#10b981" stroke-width="2"/>
+  <text x="60" y="112" font-family="Arial, sans-serif" font-size="15" fill="#10b981" font-weight="bold">✅ Transcription complete!</text>
+
+  <!-- Output directory info -->
+  <rect x="40" y="145" width="720" height="45" rx="8" fill="#1e3a8a" stroke="#3b82f6" stroke-width="2"/>
+  <text x="60" y="173" font-family="Arial, sans-serif" font-size="13" fill="#60a5fa">📁 Saved to: ~/transcripts/dQw4w9WgXcQ</text>
+
+  <!-- Tabs -->
+  <g>
+    <!-- Insights tab (active) -->
+    <rect x="40" y="210" width="140" height="40" rx="6" fill="#3b82f6" stroke="#60a5fa" stroke-width="2"/>
+    <text x="110" y="236" font-family="Arial, sans-serif" font-size="14" fill="#ffffff" text-anchor="middle" font-weight="bold">📊 Insights</text>
+
+    <!-- Transcript tab (inactive) -->
+    <rect x="190" y="210" width="140" height="40" rx="6" fill="#1f2937" stroke="#4b5563" stroke-width="1"/>
+    <text x="260" y="236" font-family="Arial, sans-serif" font-size="14" fill="#9ca3af" text-anchor="middle">📝 Transcript</text>
+  </g>
+
+  <!-- Tab content area -->
+  <rect x="40" y="250" width="720" height="500" rx="6" fill="#1f2937" stroke="#4b5563" stroke-width="1"/>
+
+  <!-- Insights content -->
+  <text x="60" y="285" font-family="Arial, sans-serif" font-size="20" fill="#ffffff" font-weight="bold">Summary</text>
+  <text x="60" y="315" font-family="Arial, sans-serif" font-size="13" fill="#d1d5db">This video explores the fundamentals of neural networks and their</text>
+  <text x="60" y="335" font-family="Arial, sans-serif" font-size="13" fill="#d1d5db">applications in modern AI. The speaker discusses backpropagation,</text>
+  <text x="60" y="355" font-family="Arial, sans-serif" font-size="13" fill="#d1d5db">activation functions, and practical implementation strategies.</text>
+
+  <text x="60" y="390" font-family="Arial, sans-serif" font-size="13" fill="#d1d5db" font-weight="bold">Key themes:</text>
+  <text x="60" y="410" font-family="Arial, sans-serif" font-size="13" fill="#9ca3af">• Deep learning architecture patterns</text>
+  <text x="60" y="430" font-family="Arial, sans-serif" font-size="13" fill="#9ca3af">• Training optimization techniques</text>
+  <text x="60" y="450" font-family="Arial, sans-serif" font-size="13" fill="#9ca3af">• Real-world deployment considerations</text>
+
+  <!-- Key Quotes section -->
+  <text x="60" y="490" font-family="Arial, sans-serif" font-size="20" fill="#ffffff" font-weight="bold">Key Quotes</text>
+
+  <!-- Quote 1 -->
+  <rect x="60" y="505" width="680" height="80" rx="4" fill="#111827" stroke="#4b5563" stroke-width="1"/>
+  <text x="75" y="530" font-family="Arial, sans-serif" font-size="13" fill="#d1d5db" font-style="italic">"The key insight is that neural networks learn hierarchical</text>
+  <text x="75" y="550" font-family="Arial, sans-serif" font-size="13" fill="#d1d5db" font-style="italic">representations, with each layer building on the previous one."</text>
+  <text x="75" y="575" font-family="Arial, sans-serif" font-size="12" fill="#60a5fa">— 00:05:30</text>
+
+  <!-- Quote 2 -->
+  <rect x="60" y="600" width="680" height="80" rx="4" fill="#111827" stroke="#4b5563" stroke-width="1"/>
+  <text x="75" y="625" font-family="Arial, sans-serif" font-size="13" fill="#d1d5db" font-style="italic">"Regularization isn't just a technical detail—it's fundamental to</text>
+  <text x="75" y="645" font-family="Arial, sans-serif" font-size="13" fill="#d1d5db" font-style="italic">preventing overfitting in production models."</text>
+  <text x="75" y="670" font-family="Arial, sans-serif" font-size="12" fill="#60a5fa">— 00:12:45</text>
+
+  <!-- Process Another button -->
+  <rect x="40" y="770" width="200" height="45" rx="8" fill="#1f2937" stroke="#3b82f6" stroke-width="2"/>
+  <text x="140" y="798" font-family="Arial, sans-serif" font-size="14" fill="#60a5fa" text-anchor="middle" font-weight="bold">Process Another</text>
+</svg>
