@@ -39,6 +39,7 @@ def launch_web_ui() -> None:
             "streamlit",
             "run",
             str(app_file),
+            "--browser.gatherUsageStats=false",  # Disable telemetry prompt
         ],
         check=False,  # Don't raise on Ctrl+C
     )
