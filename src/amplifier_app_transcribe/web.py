@@ -52,12 +52,16 @@ def launch_web_ui(verbose: bool = False) -> None:
     env = os.environ.copy()
     env["STREAMLIT_BROWSER_GATHER_USAGE_STATS"] = "false"
 
+    # Pass verbose flag to Streamlit app via environment
+    if verbose:
+        env["AMPLIFIER_VERBOSE"] = "1"
+
     # Print startup message
     print("\n🎯 Starting Amplifier Transcribe web interface...")
     print("   Browser will open automatically at http://localhost:8501")
     print("   Press Ctrl+C to stop the server")
     if verbose:
-        print("   Verbose mode: Debug output enabled\n")
+        print("   Verbose mode: Pipeline stages and LLM calls will be logged to console\n")
     else:
         print()
 
@@ -69,10 +73,6 @@ def launch_web_ui(verbose: bool = False) -> None:
         "run",
         str(app_file),
     ]
-
-    # Add verbose flags if enabled
-    if verbose:
-        streamlit_cmd.extend(["--logger.level", "debug"])
 
     try:
         # Launch Streamlit server (browser opens automatically)

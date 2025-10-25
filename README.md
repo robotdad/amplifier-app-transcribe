@@ -9,6 +9,9 @@ No installation needed - run directly with uvx:
 ```bash
 # Launch web interface (easiest for first-time users)
 uvx --from git+https://github.com/robotdad/amplifier-app-transcribe transcribe --web
+
+# With verbose output (shows pipeline stages and LLM calls)
+uvx --from git+https://github.com/robotdad/amplifier-app-transcribe transcribe --web --verbose
 ```
 
 Or use the command line directly:

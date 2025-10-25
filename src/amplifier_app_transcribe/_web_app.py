@@ -5,11 +5,26 @@ Browser-based UI for single-video transcription with settings.
 Design: Clean minimalism showcasing craft while delivering utility.
 """
 
+import logging
 import os
 import time
 from pathlib import Path
 
 import streamlit as st
+
+# Configure logging based on verbose flag
+verbose = os.getenv("AMPLIFIER_VERBOSE") == "1"
+if verbose:
+    logging.basicConfig(
+        level=logging.INFO,
+        format="[%(levelname)s] %(name)s: %(message)s",
+        force=True,
+    )
+    logger = logging.getLogger(__name__)
+    logger.info("Verbose mode enabled - pipeline stages and LLM calls will be logged")
+else:
+    # Suppress all logging in normal mode
+    logging.basicConfig(level=logging.WARNING)
 
 # Page config
 st.set_page_config(
