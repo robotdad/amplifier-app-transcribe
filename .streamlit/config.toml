@@ -12,7 +12,7 @@ font = "sans-serif"
 [server]
 headless = false
 enableCORS = false
-enableXsrfProtection = true
+enableXsrfProtection = false
 
 [browser]
 gatherUsageStats = false

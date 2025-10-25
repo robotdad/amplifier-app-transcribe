@@ -49,15 +49,25 @@ def launch_web_ui() -> None:
     env = os.environ.copy()
     env["STREAMLIT_BROWSER_GATHER_USAGE_STATS"] = "false"
 
-    # Launch Streamlit server (browser opens automatically)
-    subprocess.run(
-        [
-            sys.executable,
-            "-m",
-            "streamlit",
-            "run",
-            str(app_file),
-        ],
-        check=False,  # Don't raise on Ctrl+C
-        env=env,
-    )
+    # Print startup message
+    print("\n🎯 Starting Amplifier Transcribe web interface...")
+    print("   Browser will open automatically at http://localhost:8501")
+    print("   Press Ctrl+C to stop the server\n")
+
+    try:
+        # Launch Streamlit server (browser opens automatically)
+        subprocess.run(
+            [
+                sys.executable,
+                "-m",
+                "streamlit",
+                "run",
+                str(app_file),
+            ],
+            check=False,  # Don't raise on Ctrl+C
+            env=env,
+        )
+    except KeyboardInterrupt:
+        print("\n\n✅ Server stopped. Thanks for using Amplifier Transcribe!")
+    finally:
+        print()
