@@ -375,8 +375,6 @@ if st.session_state.results:
     st.markdown('<div class="success-banner">✅ Transcription complete</div>', unsafe_allow_html=True)
     st.info(f"📁 Saved to: `{st.session_state.results['output_dir']}`")
 
-    st.markdown('<div class="results-container">', unsafe_allow_html=True)
-
     # Tabbed interface
     if st.session_state.results["insights"]:
         tab1, tab2 = st.tabs(["📊 Insights", "📝 Transcript"])
@@ -389,8 +387,6 @@ if st.session_state.results:
     else:
         st.markdown("### 📝 Transcript")
         st.markdown(st.session_state.results["transcript"])
-
-    st.markdown("</div>", unsafe_allow_html=True)
 
     # Reset button
     if st.button("Process Another"):
