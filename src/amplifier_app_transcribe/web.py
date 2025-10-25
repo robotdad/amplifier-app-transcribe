@@ -20,12 +20,15 @@ def _setup_streamlit_config() -> None:
         credentials_path.write_text('[general]\nemail = ""\n')
 
 
-def launch_web_ui() -> None:
+def launch_web_ui(verbose: bool = False) -> None:
     """
     Launch Streamlit web interface in subprocess.
 
     Opens browser automatically to Streamlit UI.
     Blocks until user kills server (Ctrl+C).
+
+    Args:
+        verbose: Enable debug logging and console output
 
     Raises:
         RuntimeError: If Streamlit not installed or app file missing
@@ -52,18 +55,29 @@ def launch_web_ui() -> None:
     # Print startup message
     print("\n🎯 Starting Amplifier Transcribe web interface...")
     print("   Browser will open automatically at http://localhost:8501")
-    print("   Press Ctrl+C to stop the server\n")
+    print("   Press Ctrl+C to stop the server")
+    if verbose:
+        print("   Verbose mode: Debug output enabled\n")
+    else:
+        print()
+
+    # Build Streamlit command
+    streamlit_cmd = [
+        sys.executable,
+        "-m",
+        "streamlit",
+        "run",
+        str(app_file),
+    ]
+
+    # Add verbose flags if enabled
+    if verbose:
+        streamlit_cmd.extend(["--logger.level", "debug"])
 
     try:
         # Launch Streamlit server (browser opens automatically)
         subprocess.run(
-            [
-                sys.executable,
-                "-m",
-                "streamlit",
-                "run",
-                str(app_file),
-            ],
+            streamlit_cmd,
             check=False,  # Don't raise on Ctrl+C
             env=env,
         )

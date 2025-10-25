@@ -77,7 +77,7 @@ def cli(
     if web:
         from .web import launch_web_ui
 
-        launch_web_ui()
+        launch_web_ui(verbose=verbose)
         return  # launch_web_ui blocks until killed
 
     # Handle index-only mode
