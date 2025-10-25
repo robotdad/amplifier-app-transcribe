@@ -7,6 +7,13 @@
 No installation needed - run directly with uvx:
 
 ```bash
+# Launch web interface (easiest for first-time users)
+uvx --from git+https://github.com/robotdad/amplifier-app-transcribe transcribe --web
+```
+
+Or use the command line directly:
+
+```bash
 uvx --from git+https://github.com/robotdad/amplifier-app-transcribe transcribe "https://youtube.com/watch?v=..."
 ```
 

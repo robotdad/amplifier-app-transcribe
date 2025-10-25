@@ -10,7 +10,7 @@ textColor = "#1A202C"
 font = "sans-serif"
 
 [server]
-headless = true
+headless = false
 enableCORS = false
 enableXsrfProtection = true
 
