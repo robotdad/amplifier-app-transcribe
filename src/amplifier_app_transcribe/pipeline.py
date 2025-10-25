@@ -117,54 +117,57 @@ class TranscriptionPipeline:
                     },
                 )()
 
-            # Check if already processed
-            if self.state.is_already_processed(video_info.id):
-                logger.info(f"⏭ Skipping (already processed): {video_info.title}")
-                return True
-
-            logger.info(f"Processing: {video_info.title}")
-            if video_info.duration > 0:
-                logger.info(f"  Duration: {video_info.duration / 60:.1f} minutes")
-
-            # Estimate cost
-            if hasattr(self.whisper, "estimate_cost"):
-                cost = self.whisper.estimate_cost(video_info.duration)
-                logger.info(f"  Estimated cost: ${cost:.3f}")
-            else:
-                cost = 0.0
-
             # Determine output directory for this video
             video_id = self.storage._sanitize_filename(video_info.id)
             output_dir = self.storage.output_dir / video_id
             output_dir.mkdir(parents=True, exist_ok=True)
 
-            # Stage 2: Download/extract audio
-            self.state.update_stage("extracting", video_info.id)
-            self._report_progress("extracting", {"video_id": video_info.id, "title": video_info.title})
+            # Check for cached transcript (skip expensive transcription)
+            transcript = None
+            cost = 0.0
 
-            if is_url:
-                # Download audio using youtube tool
-                audio_path = self.youtube.download_audio(
-                    source, output_dir, output_filename="audio.mp3", use_cache=(not self.force_download)
-                )
-            else:
-                # Local file - just use it directly or copy
-                audio_path = Path(source)
-                if not audio_path.exists():
-                    raise FileNotFoundError(f"Audio file not found: {source}")
+            if self.storage.has_transcript(video_info.id) and not self.force_download:
+                logger.info(f"Found cached transcript for: {video_info.title}")
+                transcript = self.storage.load_transcript(video_info.id)
 
-            # Stage 3: Compress if needed
-            audio_path = self.audio_extractor.compress_for_api(audio_path)
+            # If no cached transcript, do full transcription
+            if transcript is None:
+                logger.info(f"Processing: {video_info.title}")
+                if video_info.duration > 0:
+                    logger.info(f"  Duration: {video_info.duration / 60:.1f} minutes")
 
-            # Stage 4: Transcribe
-            self.state.update_stage("transcribing", video_info.id)
-            self._report_progress("transcribing", {"video_id": video_info.id, "duration": video_info.duration})
-            transcript = self.whisper.transcribe(audio_path, prompt=f"Transcription of: {video_info.title}")
+                # Estimate cost
+                if hasattr(self.whisper, "estimate_cost"):
+                    cost = self.whisper.estimate_cost(video_info.duration)
+                    logger.info(f"  Estimated cost: ${cost:.3f}")
 
-            # Stage 5: Save outputs
-            self.state.update_stage("saving", video_info.id)
-            self._report_progress("saving", {"video_id": video_info.id})
-            output_dir = self.storage.save(transcript, video_info, audio_path)
+                # Stage 2: Download/extract audio
+                self.state.update_stage("extracting", video_info.id)
+                self._report_progress("extracting", {"video_id": video_info.id, "title": video_info.title})
+
+                if is_url:
+                    # Download audio using youtube tool
+                    audio_path = self.youtube.download_audio(
+                        source, output_dir, output_filename="audio.mp3", use_cache=(not self.force_download)
+                    )
+                else:
+                    # Local file - just use it directly or copy
+                    audio_path = Path(source)
+                    if not audio_path.exists():
+                        raise FileNotFoundError(f"Audio file not found: {source}")
+
+                # Stage 3: Compress if needed
+                audio_path = self.audio_extractor.compress_for_api(audio_path)
+
+                # Stage 4: Transcribe
+                self.state.update_stage("transcribing", video_info.id)
+                self._report_progress("transcribing", {"video_id": video_info.id, "duration": video_info.duration})
+                transcript = self.whisper.transcribe(audio_path, prompt=f"Transcription of: {video_info.title}")
+
+                # Stage 5: Save outputs
+                self.state.update_stage("saving", video_info.id)
+                self._report_progress("saving", {"video_id": video_info.id})
+                output_dir = self.storage.save(transcript, video_info, audio_path)
 
             # Stage 6: AI Enhancement (if enabled)
             if self.enhance and self.summary_generator and self.quote_extractor:

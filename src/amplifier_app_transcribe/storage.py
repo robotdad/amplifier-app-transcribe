@@ -146,6 +146,57 @@ class TranscriptStorage:
         logger.info(f"Saved insights to: {insights_path}")
         return insights_path
 
+    def has_transcript(self, video_id: str) -> bool:
+        """Check if transcript already exists for a video.
+
+        Args:
+            video_id: Video identifier
+
+        Returns:
+            True if transcript.json exists
+        """
+        video_id_sanitized = self._sanitize_filename(video_id)
+        transcript_path = self.output_dir / video_id_sanitized / "transcript.json"
+        return transcript_path.exists()
+
+    def load_transcript(self, video_id: str):
+        """Load existing transcript from disk.
+
+        Args:
+            video_id: Video identifier
+
+        Returns:
+            Transcript object loaded from JSON, or None if not found
+        """
+        video_id_sanitized = self._sanitize_filename(video_id)
+        transcript_path = self.output_dir / video_id_sanitized / "transcript.json"
+
+        if not transcript_path.exists():
+            return None
+
+        try:
+            with open(transcript_path, encoding="utf-8") as f:
+                data = json.load(f)
+
+            # Reconstruct transcript object from JSON
+            # Create simple namespace object with transcript data
+            from types import SimpleNamespace
+
+            segments = [SimpleNamespace(**seg) for seg in data["transcript"]["segments"]]
+            transcript = SimpleNamespace(
+                text=data["transcript"]["text"],
+                language=data["transcript"]["language"],
+                duration=data["transcript"]["duration"],
+                segments=segments,
+            )
+
+            logger.info(f"Loaded cached transcript from: {transcript_path}")
+            return transcript
+
+        except Exception as e:
+            logger.warning(f"Failed to load cached transcript: {e}")
+            return None
+
     def _sanitize_filename(self, name: str) -> str:
         """Sanitize filename for filesystem."""
         # Remove invalid characters
