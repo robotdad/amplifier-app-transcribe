@@ -119,6 +119,7 @@ class TranscriptStorage:
         quotes: list | None,
         title: str,
         output_dir: Path,
+        question: str | None = None,
     ) -> Path:
         """Save combined insights document with summary and quotes.
 
@@ -127,6 +128,7 @@ class TranscriptStorage:
             quotes: List of Quote objects
             title: Title of the content
             output_dir: Directory to save the insights
+            question: Optional question that was asked
 
         Returns:
             Path to saved insights file
@@ -136,6 +138,7 @@ class TranscriptStorage:
             summary=summary,
             quotes=quotes,
             title=title,
+            question=question,
         )
 
         # Save to file

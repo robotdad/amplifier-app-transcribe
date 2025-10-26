@@ -285,6 +285,17 @@ with col2:
         help="Generate summaries and extract key quotes",
     )
 
+# Optional question input (only shown when AI Insights is enabled)
+question = None
+if enhance:
+    question = st.text_input(
+        "Optional: Question to answer in insights",
+        placeholder="e.g., What are the main takeaways about X?",
+        disabled=st.session_state.processing,
+        key="question_input",
+        help="If provided, the AI will specifically address this question in the overview",
+    )
+
 # Process button - left aligned
 transcribe_button = st.button(
     "Transcribe",
@@ -310,11 +321,12 @@ if transcribe_button:
         def update_progress(stage: str, data: dict):
             st.session_state.current_stage = stage
 
-        # Create pipeline
+        # Create pipeline (with optional question)
         pipeline = TranscriptionPipeline(
             state_manager=StateManager(),
             enhance=enhance,
             on_progress=update_progress,
+            question=question if question and question.strip() else None,
         )
 
         # Override output directory from settings if configured

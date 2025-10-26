@@ -39,6 +39,7 @@ def setup_logging(verbose: bool = False):
 @click.option("--no-enhance", is_flag=True, help="Skip AI enhancements (summaries/quotes)")
 @click.option("--force-download", is_flag=True, help="Skip cache and re-download audio")
 @click.option("--index-only", is_flag=True, help="Generate index.md only (no transcription)")
+@click.option("--question", "-q", type=str, help="Question to answer in insights overview")
 @click.option("--verbose", "-v", is_flag=True, help="Enable verbose logging")
 def cli(
     sources: tuple[str] | None,
@@ -49,6 +50,7 @@ def cli(
     no_enhance: bool,
     force_download: bool,
     index_only: bool,
+    question: str | None,
     verbose: bool,
 ):
     """Transcribe videos and audio files with AI-powered insights.
@@ -125,6 +127,7 @@ def cli(
             state_manager=state_manager,
             enhance=enhance,
             force_download=force_download,
+            question=question,
         )
 
         # Override output directory if specified

@@ -23,9 +23,10 @@ logger = logging.getLogger(__name__)
 class Summary:
     """Structured summary with overview and key points."""
 
-    overview: str  # 2-3 sentence overview
+    overview: str  # 2-3 sentence overview (or full answer when question provided)
     key_points: list[str]  # 3-5 bullet points
     themes: list[str]  # Main themes discussed
+    truncation_warning: str | None = None  # Warning if transcript was truncated
 
 
 @dataclass
@@ -46,7 +47,7 @@ class SummaryGenerator:
 
         Args:
             api_key: Anthropic API key. If not provided, reads from ANTHROPIC_API_KEY env var.
-            model: Model to use. If not provided, uses AMPLIFIER_MODEL_DEFAULT or claude-3-haiku-20240307.
+            model: Model to use. If not provided, uses AMPLIFIER_MODEL_DEFAULT or claude-haiku-4-5-20251001.
         """
         if not ANTHROPIC_AVAILABLE:
             raise ImportError("anthropic package not available. Install with: pip install anthropic")
@@ -57,22 +58,81 @@ class SummaryGenerator:
             raise ValueError("ANTHROPIC_API_KEY not set. Please set it in your environment or pass it as a parameter.")
 
         # Get model from param or environment
-        self.model = model or os.getenv("AMPLIFIER_MODEL_DEFAULT", "claude-3-haiku-20240307")
+        # Default to Claude Haiku 4.5 (Oct 2025) - fastest model with near-frontier intelligence
+        self.model = model or os.getenv("AMPLIFIER_MODEL_DEFAULT", "claude-haiku-4-5-20251001")
 
         # Initialize Anthropic client
         self.client = Anthropic(api_key=self.api_key)
 
-    def generate(self, transcript_text: str, title: str) -> Summary:
+    def generate(self, transcript_text: str, title: str, question: str | None = None) -> Summary:
         """Generate a concise summary from transcript text.
 
         Args:
             transcript_text: Full transcript text
             title: Title of the video/content
+            question: Optional question to answer in the overview
 
         Returns:
             Summary object with overview, key points, and themes
         """
-        prompt = f"""Please summarize this transcript titled "{title}".
+        # Check if we need to truncate
+        max_chars = 100000  # ~25k tokens for Haiku 4.5's 200k context window
+        original_length = len(transcript_text)
+        was_truncated = original_length > max_chars
+
+        if was_truncated:
+            truncation_note = (
+                f"\n\n⚠️ NOTE: Transcript was truncated for processing. "
+                f"Used first {max_chars:,} of {original_length:,} characters "
+                f"({max_chars * 100 // original_length}% of total). "
+                f"Results may be incomplete for content near the end."
+            )
+            logger.warning(
+                f"Transcript truncated: {original_length:,} chars -> {max_chars:,} chars "
+                f"({original_length - max_chars:,} chars dropped)"
+            )
+        else:
+            truncation_note = ""
+
+        # When a question is provided, it becomes the PRIMARY directive
+        if question:
+            prompt = f"""IMPORTANT: You are being asked to ANSWER A SPECIFIC QUESTION, not summarize the transcript.
+
+The user asked: "{question}"
+
+Extract and provide the COMPLETE, LITERAL ANSWER from the transcript.
+
+CRITICAL INSTRUCTIONS:
+- If asked for a recipe: Extract ALL ingredients with exact quantities + ALL step-by-step instructions
+- If asked "how does X work": Extract the complete explanation with all details
+- DO NOT summarize - provide the actual content requested
+- DO NOT give an overview - give the literal answer
+- Use the exact information from the transcript, not a high-level description
+
+Transcript:
+{transcript_text[:100000]}
+
+Title: {title}
+
+Please respond in this format:
+OVERVIEW:
+[The COMPLETE, DETAILED answer - not a summary.
+If recipe: ingredients list + numbered steps.
+If explanation: the full explanation.
+If information: the actual data requested.]
+
+KEY POINTS:
+- [Additional context or tips from the video]
+- [Important notes or variations mentioned]
+[etc.]
+
+THEMES:
+- [Related themes if relevant]
+[etc. - optional]
+"""
+        else:
+            # Standard summary format when no question provided
+            prompt = f"""Please summarize this transcript titled "{title}".
 
 Provide:
 1. A 2-3 sentence overview that captures the essence of the content
@@ -82,7 +142,7 @@ Provide:
 Focus on actionable insights and important ideas. Be concise.
 
 Transcript:
-{transcript_text[:15000]}  # Limit to first 15k chars to avoid token limits
+{transcript_text[:100000]}
 
 Please respond in this exact format:
 OVERVIEW:
@@ -101,9 +161,14 @@ THEMES:
 """
 
         try:
+            # Use more tokens when answering questions (they need detail)
+            # vs standard summaries (concise by design)
+            # Claude 3 Haiku supports up to 4096 tokens, Claude 3.5 up to 8192
+            max_tokens = 4000 if question else 1500
+
             response = self.client.messages.create(
                 model=self.model,
-                max_tokens=1000,
+                max_tokens=max_tokens,
                 temperature=0.3,  # Lower temperature for more focused summaries
                 messages=[
                     {
@@ -121,7 +186,14 @@ THEMES:
                     break
             if not content:
                 content = str(response.content[0])
-            return self._parse_summary(content)
+
+            summary = self._parse_summary(content)
+
+            # Add truncation warning if transcript was truncated
+            if was_truncated:
+                summary.truncation_warning = truncation_note
+
+            return summary
 
         except Exception as e:
             logger.error(f"Failed to generate summary: {e}")
@@ -164,7 +236,7 @@ THEMES:
 
             if section == "overview":
                 if overview:
-                    overview += " " + line
+                    overview += "\n" + line  # Preserve line breaks for formatting
                 else:
                     overview = line
             elif section == "key_points" and line.startswith("- "):
@@ -191,7 +263,7 @@ class QuoteExtractor:
 
         Args:
             api_key: Anthropic API key. If not provided, reads from ANTHROPIC_API_KEY env var.
-            model: Model to use. If not provided, uses AMPLIFIER_MODEL_DEFAULT or claude-3-haiku-20240307.
+            model: Model to use. If not provided, uses AMPLIFIER_MODEL_DEFAULT or claude-haiku-4-5-20251001.
         """
         if not ANTHROPIC_AVAILABLE:
             raise ImportError("anthropic package not available. Install with: pip install anthropic")
@@ -202,7 +274,8 @@ class QuoteExtractor:
             raise ValueError("ANTHROPIC_API_KEY not set. Please set it in your environment or pass it as a parameter.")
 
         # Get model from param or environment
-        self.model = model or os.getenv("AMPLIFIER_MODEL_DEFAULT", "claude-3-haiku-20240307")
+        # Default to Claude Haiku 4.5 (Oct 2025) - fastest model with near-frontier intelligence
+        self.model = model or os.getenv("AMPLIFIER_MODEL_DEFAULT", "claude-haiku-4-5-20251001")
 
         # Initialize Anthropic client
         self.client = Anthropic(api_key=self.api_key)
@@ -235,7 +308,7 @@ For each quote, provide:
 3. Context explaining why this quote is significant
 
 Transcript:
-{transcript_with_timestamps[:15000]}  # Limit to first 15k chars
+{transcript_with_timestamps[:100000]}  # ~25k tokens - well within Haiku 4.5's 200k context
 
 Please respond in JSON format with an array of quotes:
 [
@@ -364,6 +437,7 @@ def generate_insights(
     summary: Summary | None,
     quotes: list[Quote] | None,
     title: str,
+    question: str | None = None,
 ) -> str:
     """
     Combine summary and quotes into a single insights document.
@@ -375,6 +449,7 @@ def generate_insights(
         summary: Summary object with overview and key points
         quotes: List of Quote objects with timestamps
         title: Title of the video/content
+        question: Optional question that was asked
 
     Returns:
         Formatted markdown insights document
@@ -383,6 +458,31 @@ def generate_insights(
         f"# Insights: {title}",
         "",
     ]
+
+    # Add truncation warning at the top if present
+    if summary and summary.truncation_warning:
+        lines.extend(
+            [
+                "---",
+                "⚠️ **TRUNCATION WARNING**",
+                "",
+                summary.truncation_warning.strip(),
+                "",
+                "---",
+                "",
+            ]
+        )
+
+    # Add question section if provided
+    if question:
+        lines.extend(
+            [
+                "## Question",
+                "",
+                f"> {question}",
+                "",
+            ]
+        )
 
     # Add overview if available
     if summary and summary.overview:

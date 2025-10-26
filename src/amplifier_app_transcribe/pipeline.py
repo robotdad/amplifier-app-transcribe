@@ -32,6 +32,7 @@ class TranscriptionPipeline:
         enhance: bool = True,
         force_download: bool = False,
         on_progress: ProgressCallback | None = None,
+        question: str | None = None,
     ):
         """Initialize pipeline.
 
@@ -40,6 +41,7 @@ class TranscriptionPipeline:
             enhance: Whether to enable AI enhancements (summaries/quotes)
             force_download: If True, skip cache and re-download audio
             on_progress: Optional callback for progress updates (stage, data) -> None
+            question: Optional question to answer in insights overview
         """
         # Initialize tool core classes directly
         self.whisper = WhisperTranscriber()
@@ -49,6 +51,7 @@ class TranscriptionPipeline:
         self.enhance = enhance
         self.force_download = force_download
         self.on_progress = on_progress
+        self.question = question
 
         # Initialize storage
         self.storage = TranscriptStorage()
@@ -176,8 +179,8 @@ class TranscriptionPipeline:
                     self._report_progress("enhancing", {"video_id": video_info.id})
                     logger.info("Generating AI enhancements...")
 
-                    # Generate summary
-                    summary = self.summary_generator.generate(transcript.text, video_info.title)
+                    # Generate summary (with optional question)
+                    summary = self.summary_generator.generate(transcript.text, video_info.title, question=self.question)
 
                     # Extract quotes
                     video_url = source if is_url else None
@@ -189,6 +192,7 @@ class TranscriptionPipeline:
                         quotes=quotes,
                         title=video_info.title,
                         output_dir=output_dir,
+                        question=self.question,
                     )
 
                     logger.info("✓ AI enhancements complete")
